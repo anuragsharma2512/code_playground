@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import type { Project } from "../types";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -43,6 +43,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   MoreHorizontal,
   Edit3,
@@ -54,16 +55,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkedToggleButton } from "./marked-toggle";
+import {
+  deleteProjectById,
+  duplicateProjectById,
+  editProjectById,
+} from "../actions";
 
 interface ProjectTableProps {
   projects: Project[];
-  onUpdateProject?: (
-    id: string,
-    data: { title: string; description: string }
-  ) => Promise<void>;
-  onDeleteProject?: (id: string) => Promise<void>;
-  onDuplicateProject?: (id: string) => Promise<void>;
-  
 }
 
 interface EditProjectData {
@@ -73,11 +72,8 @@ interface EditProjectData {
 
 export default function ProjectTable({
   projects,
-  onUpdateProject,
-  onDeleteProject,
-  onDuplicateProject,
-
 }: ProjectTableProps) {
+  const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -104,13 +100,14 @@ export default function ProjectTable({
   };
 
   const handleUpdateProject = async () => {
-    if (!selectedProject || !onUpdateProject) return;
+    if (!selectedProject) return;
 
     setIsLoading(true);
 
     try {
-      await onUpdateProject(selectedProject.id, editData);
+      await editProjectById(selectedProject.id, editData);
       setEditDialogOpen(false);
+      router.refresh();
       toast.success("Project updated successfully");
     } catch (error) {
       toast.error("Failed to update project");
@@ -125,13 +122,14 @@ export default function ProjectTable({
   };
 
   const handleDeleteProject = async () => {
-    if (!selectedProject || !onDeleteProject) return;
+    if (!selectedProject) return;
 
     setIsLoading(true);
     try {
-      await onDeleteProject(selectedProject.id);
+      await deleteProjectById(selectedProject.id);
       setDeleteDialogOpen(false);
       setSelectedProject(null);
+      router.refresh();
       toast.success("Project deleted successfully");
     } catch (error) {
       toast.error("Failed to delete project");
@@ -142,11 +140,10 @@ export default function ProjectTable({
   };
 
   const handleDuplicateProject = async (project: Project) => {
-    if (!onDuplicateProject) return;
-
     setIsLoading(true);
     try {
-      await onDuplicateProject(project.id);
+      await duplicateProjectById(project.id);
+      router.refresh();
       toast.success("Project duplicated successfully");
     } catch (error) {
       toast.error("Failed to duplicate project");
