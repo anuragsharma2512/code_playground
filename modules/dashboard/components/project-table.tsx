@@ -161,29 +161,29 @@ export default function ProjectTable({
 
   return (
     <>
-      <div className="border rounded-lg overflow-hidden">
+      <div className="w-full overflow-hidden rounded-lg border border-zinc-200/80 bg-white/80 shadow-xl shadow-zinc-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/60">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Project</TableHead>
-              <TableHead>Template</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>User</TableHead>
+          <TableHeader className="bg-zinc-50/90 dark:bg-white/5">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-semibold text-zinc-700 dark:text-zinc-200">Project</TableHead>
+              <TableHead className="font-semibold text-zinc-700 dark:text-zinc-200">Template</TableHead>
+              <TableHead className="font-semibold text-zinc-700 dark:text-zinc-200">Created</TableHead>
+              <TableHead className="font-semibold text-zinc-700 dark:text-zinc-200">User</TableHead>
               <TableHead className="w-[50px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {projects.map((project) => (
-              <TableRow key={project.id}>
+              <TableRow key={project.id} className="transition-colors hover:bg-teal-500/5">
                 <TableCell className="font-medium">
                   <div className="flex flex-col">
                     <Link
                       href={`/playground/${project.id}`}
-                      className="hover:underline"
+                      className="text-zinc-950 transition-colors hover:text-[#E93F3F] dark:text-white"
                     >
                       <span className="font-semibold">{project.title}</span>
                     </Link>
-                    <span className="text-sm text-gray-500 line-clamp-1">
+                    <span className="text-sm text-zinc-500 line-clamp-1 dark:text-zinc-400">
                       {project.description}
                     </span>
                   </div>
@@ -191,13 +191,13 @@ export default function ProjectTable({
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className="bg-[#E93F3F15] text-[#E93F3F] border-[#E93F3F]"
+                    className="bg-[#E93F3F]/10 text-[#E93F3F] border-[#E93F3F]/30"
                   >
                     {project.template}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
                     {format(new Date(project.createdAt), "MMM dd, yyyy")}
                   </span>
                 </TableCell>

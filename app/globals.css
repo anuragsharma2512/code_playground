@@ -120,3 +120,176 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .code-background {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 251, 0.9) 42%, rgba(250, 250, 250, 0.96)),
+      radial-gradient(circle at 14% 20%, rgba(20, 184, 166, 0.16), transparent 31%),
+      radial-gradient(circle at 88% 8%, rgba(251, 191, 36, 0.12), transparent 28%),
+      radial-gradient(circle at 78% 82%, rgba(233, 63, 63, 0.14), transparent 34%);
+  }
+
+  .dark .code-background {
+    background:
+      linear-gradient(135deg, rgba(5, 8, 14, 0.98), rgba(15, 23, 32, 0.94) 48%, rgba(8, 13, 20, 0.98)),
+      radial-gradient(circle at 14% 20%, rgba(20, 184, 166, 0.18), transparent 31%),
+      radial-gradient(circle at 88% 8%, rgba(251, 191, 36, 0.12), transparent 28%),
+      radial-gradient(circle at 78% 82%, rgba(233, 63, 63, 0.18), transparent 34%);
+  }
+
+  .code-background::before,
+  .code-background::after {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    opacity: 0.36;
+    filter: blur(34px);
+    background:
+      conic-gradient(from 135deg at 50% 50%, transparent 0 16%, rgba(20, 184, 166, 0.42) 17% 24%, transparent 25% 45%, rgba(233, 63, 63, 0.24) 46% 56%, transparent 57% 100%);
+    animation: code-drift 18s linear infinite;
+  }
+
+  .code-background::after {
+    opacity: 0.2;
+    animation-duration: 26s;
+    animation-direction: reverse;
+    transform: rotate(18deg);
+  }
+
+  .code-background__grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.52;
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: linear-gradient(to bottom, black, transparent 88%);
+    animation: code-grid-slide 16s linear infinite;
+  }
+
+  .dark .code-background__grid {
+    background-image:
+      linear-gradient(to right, rgba(226, 232, 240, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(226, 232, 240, 0.08) 1px, transparent 1px);
+  }
+
+  .code-background__scan {
+    position: absolute;
+    width: 42rem;
+    height: 1px;
+    left: -12rem;
+    background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.58), rgba(233, 63, 63, 0.42), transparent);
+    box-shadow: 0 0 22px rgba(20, 184, 166, 0.28);
+    transform: rotate(-18deg);
+    animation: code-scan 9s ease-in-out infinite;
+  }
+
+  .code-background__scan--one {
+    top: 28%;
+  }
+
+  .code-background__scan--two {
+    top: 64%;
+    animation-delay: -4s;
+    animation-duration: 12s;
+  }
+
+  .code-background__syntax {
+    position: absolute;
+    width: min(58vw, 40rem);
+    height: min(58vw, 40rem);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    opacity: 0.24;
+    transform: rotate(12deg);
+    animation: code-float 12s ease-in-out infinite;
+  }
+
+  .dark .code-background__syntax {
+    border-color: rgba(226, 232, 240, 0.1);
+  }
+
+  .code-background__syntax::before,
+  .code-background__syntax::after {
+    content: "{ }";
+    position: absolute;
+    color: rgba(233, 63, 63, 0.38);
+    font-family: var(--font-geist-mono), monospace;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 700;
+  }
+
+  .code-background__syntax::after {
+    content: "</>";
+    right: 8%;
+    bottom: 10%;
+    color: rgba(20, 184, 166, 0.36);
+    font-size: clamp(2rem, 7vw, 5.5rem);
+  }
+
+  .code-background__syntax--one {
+    top: 4rem;
+    right: -9rem;
+  }
+
+  .code-background__syntax--two {
+    left: -11rem;
+    bottom: -12rem;
+    animation-delay: -6s;
+    animation-duration: 15s;
+  }
+
+  @keyframes code-drift {
+    from {
+      transform: rotate(0deg) scale(1);
+    }
+    to {
+      transform: rotate(360deg) scale(1.05);
+    }
+  }
+
+  @keyframes code-grid-slide {
+    from {
+      background-position: 0 0, 0 0;
+    }
+    to {
+      background-position: 54px 54px, 54px 54px;
+    }
+  }
+
+  @keyframes code-scan {
+    0%,
+    100% {
+      transform: translateX(-20%) rotate(-18deg);
+      opacity: 0;
+    }
+    20%,
+    70% {
+      opacity: 0.75;
+    }
+    50% {
+      transform: translateX(95vw) rotate(-18deg);
+    }
+  }
+
+  @keyframes code-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(12deg);
+    }
+    50% {
+      transform: translate3d(1.25rem, -1rem, 0) rotate(16deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .code-background::before,
+    .code-background::after,
+    .code-background__grid,
+    .code-background__scan,
+    .code-background__syntax {
+      animation: none;
+    }
+  }
+}

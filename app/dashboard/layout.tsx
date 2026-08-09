@@ -1,3 +1,4 @@
+import { CodeBackground } from "@/components/code-background";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { getAllPlaygroundForUser } from "@/modules/dashboard/actions";
 import { DashboardSidebar } from "@/modules/dashboard/components/dashboard-sidebare";
@@ -30,11 +31,12 @@ export default async function DashboardLayout({
 
     return(
     <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
+        <div className="relative flex min-h-screen w-full overflow-x-hidden">
+            <CodeBackground/>
             {/* Dashboard Sidebar */}
             {/* @ts-ignore */}
             <DashboardSidebar initialPlaygroundData={formattedPlaygroundData} />
-            <main className="flex-1">
+            <main className="relative z-10 flex-1">
                 {children}
             </main>
         </div>
