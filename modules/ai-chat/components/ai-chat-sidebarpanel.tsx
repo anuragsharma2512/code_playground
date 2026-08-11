@@ -128,7 +128,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
   const [filterType, setFilterType] = useState<string>("all");
   const [autoSave, setAutoSave] = useState(true);
   const [streamResponse, setStreamResponse] = useState(true);
-  const [model, setModel] = useState<string>("codellama:latest");
+  const [model, setModel] = useState<string>("openai/gpt-oss-20b");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -153,8 +153,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     const messageType =
@@ -232,7 +231,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
         {
           role: "assistant",
           content:
-            "I'm having trouble connecting to Ollama right now. Please check that your local model is running and try again.",
+            "I'm having trouble connecting to Groq right now. Please check that your API key is configured and try again.",
           timestamp: new Date(),
           id: Date.now().toString(),
         },
@@ -272,7 +271,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
 
   const loadingText =
     chatMode === "review"
-      ? "Reviewing your code with Ollama..."
+      ? "Reviewing your code with Groq..."
       : chatMode === "fix"
       ? "Tracing the issue and drafting a fix..."
       : chatMode === "optimize"
@@ -311,7 +310,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                       CodeNova Copilot
                     </h2>
                     <span className="rounded-full border border-teal-400/30 bg-teal-400/10 px-2 py-0.5 text-xs font-medium text-teal-200">
-                      Ollama
+                      Groq
                     </span>
                   </div>
                   <p className="mt-1 flex items-center gap-2 text-sm text-zinc-400">
@@ -324,7 +323,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
 
               <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-zinc-300 xl:flex">
                 <span className="h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_16px_rgba(45,212,191,0.9)]" />
-                Local model
+                Groq model
               </div>
 
               <div className="flex items-center gap-2">
@@ -400,9 +399,9 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                       onChange={(e) => setModel(e.target.value)}
                       className="bg-transparent text-zinc-100 outline-none"
                     >
-                      <option value="codellama:latest">codellama:latest</option>
-                      <option value="llama3.1:latest">llama3.1:latest</option>
-                      <option value="deepseek-coder:latest">deepseek-coder:latest</option>
+                      <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+                      <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                      <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b</option>
                     </select>
                   </div>
 
@@ -457,7 +456,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                     <Brain className="h-8 w-8 text-teal-200" />
                   </div>
                   <h3 className="text-2xl font-semibold text-white">
-                    Ask Ollama about your code
+                    Ask Groq about your code
                   </h3>
                   <p className="mt-3 max-w-lg text-sm leading-6 text-zinc-400">
                     Paste code, ask for a review, describe an error, or request a cleaner implementation.
@@ -512,8 +511,15 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                           remarkPlugins={[remarkGfm, remarkMath]}
                           rehypePlugins={[rehypeKatex]}
                           components={{
-                            code: (props: any) => {
-                              const { children, className, inline } = props;
+                            code: ({
+                              children,
+                              className,
+                              inline,
+                            }: {
+                              children?: React.ReactNode;
+                              className?: string;
+                              inline?: boolean;
+                            }) => {
                               if (inline) {
                                 return (
                                   <code className="rounded bg-white/10 px-1.5 py-0.5 text-sm text-teal-100">
@@ -589,7 +595,10 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
           </main>
 
           <form
-            onSubmit={handleSendMessage}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
             className="relative z-10 shrink-0 border-t border-white/10 bg-slate-950/80 p-4 backdrop-blur-xl"
           >
             <div className="flex items-end gap-3">
@@ -608,7 +617,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                      handleSendMessage(e as any);
+                      handleSendMessage();
                     }
                   }}
                   disabled={isLoading}

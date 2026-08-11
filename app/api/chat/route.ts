@@ -1,5 +1,4 @@
-import { db } from "@/lib/db";
-import { error } from "console";
+import { createGroqChatCompletion, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { NextRequest, NextResponse } from "next/server";
 
 interface ChatMessage {
@@ -10,9 +9,10 @@ interface ChatMessage {
 interface ChatRequest {
   message: string;
   history: ChatMessage[];
+  model?: string;
 }
 
-async function generateAIResponse(messages: ChatMessage[]): Promise<string> {
+async function generateAIResponse(messages: ChatMessage[], model?: string) {
   const systemPrompt = `You are a helpful AI coding assistant. You help developers with:
 - Code explanations and debugging
 - Best practices and architecture advice  
@@ -22,37 +22,18 @@ async function generateAIResponse(messages: ChatMessage[]): Promise<string> {
 
 Always provide clear, practical answers. Use proper code formatting when showing examples.`;
 
-  const fullMessages = [{ role: "system", content: systemPrompt }, ...messages];
-
-  const prompt = fullMessages
-    .map((msg) => `${msg.role}: ${msg.content}`)
-    .join("\n\n");
+  const fullMessages = [
+    { role: "system" as const, content: systemPrompt },
+    ...messages,
+  ];
 
   try {
-    const response = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "codellama:latest",
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.7, // Controls randomness (0-1)
-          max_tokens: 1000, // Maximum response length
-          top_p: 0.9, // controls diversity
-        },
-      }),
+    return await createGroqChatCompletion({
+      messages: fullMessages,
+      model: model || DEFAULT_GROQ_MODEL,
+      temperature: 0.7,
+      maxTokens: 1000,
     });
-
-    const data = await response.json();
-
-    if (!data.response) {
-      throw new Error("No response from AI model");
-    }
-
-    return data.response.trim();
   } catch (error) {
     console.error("AI generation error:", error);
     throw new Error("Failed to generate AI response");
@@ -62,7 +43,7 @@ Always provide clear, practical answers. Use proper code formatting when showing
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], model } = body;
 
     // Validate input
     if (!message || typeof message !== "string") {
@@ -93,12 +74,14 @@ export async function POST(req: NextRequest) {
 
     //   Generate ai response
 
-    const aiResponse = await generateAIResponse(messages);
+    const aiResponse = await generateAIResponse(messages, model);
 
 
 
     return NextResponse.json({
-      response: aiResponse,
+      response: aiResponse.content,
+      model: aiResponse.model,
+      tokens: aiResponse.tokens,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

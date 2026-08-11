@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { createGroqChatCompletion } from "@/lib/groq";
 
 
 interface CodeSuggestionRequest {
@@ -58,10 +59,11 @@ export async function POST(request: NextRequest) {
         generatedAt: new Date().toISOString(),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Context analysis error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message },
       { status: 500 }
     );
   }
@@ -139,26 +141,18 @@ Generate suggestion:`;
 
 async function generateSuggestion(prompt: string): Promise<string> {
   try {
-    const response = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "codellama:latest",
-        prompt,
-        stream: false,
-        option: {
-          temperature: 0.7,
-          max_tokens: 300,
+    const response = await createGroqChatCompletion({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
         },
-      }),
+      ],
+      temperature: 0.7,
+      maxTokens: 300,
     });
 
-       if (!response.ok) {
-      throw new Error(`AI service error: ${response.statusText}`)
-    }
-
-      const data = await response.json()
-    let suggestion = data.response
+    let suggestion = response.content
 
      // Clean up the suggestion
     if (suggestion.includes("```")) {
@@ -168,8 +162,8 @@ async function generateSuggestion(prompt: string): Promise<string> {
 
     return suggestion
   } catch (error) {
-      console.error("AI generation error:", error)
-    return "// AI suggestion unavailable"
+    console.error("AI generation error:", error)
+    throw error
   }
 }
 
